@@ -8,8 +8,9 @@
 
 import UIKit
 import AVKit
+import Firebase
 
-class ViewController: UIViewController {
+class MessageListViewController: UIViewController {
 
     var player: AVPlayer!
     
@@ -69,7 +70,7 @@ class ViewController: UIViewController {
 
 }
 
-extension ViewController {
+extension MessageListViewController {
     @objc func enterLoginViewController() {
         navigationController?.pushViewController(LoginViewController(), animated: true)
     }

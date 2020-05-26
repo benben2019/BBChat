@@ -8,8 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0DF83B57247767A800B2F734 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B56247767A800B2F734 /* AppDelegate.swift */; };
-		0DF83B59247767A800B2F734 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B58247767A800B2F734 /* SceneDelegate.swift */; };
-		0DF83B5B247767A800B2F734 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B5A247767A800B2F734 /* ViewController.swift */; };
+		0DF83B5B247767A800B2F734 /* MessageListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B5A247767A800B2F734 /* MessageListViewController.swift */; };
 		0DF83B5E247767A800B2F734 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B5C247767A800B2F734 /* Main.storyboard */; };
 		0DF83B60247767AA00B2F734 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B5F247767AA00B2F734 /* Assets.xcassets */; };
 		0DF83B63247767AA00B2F734 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B61247767AA00B2F734 /* LaunchScreen.storyboard */; };
@@ -21,14 +20,18 @@
 		0DF83B7624779FC400B2F734 /* UIColor+extensitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B7524779FC400B2F734 /* UIColor+extensitions.swift */; };
 		0DF83B782477AC8100B2F734 /* cat.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B772477AC8100B2F734 /* cat.mp4 */; };
 		0DF83B7A2477BDDD00B2F734 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B792477BDDD00B2F734 /* HomeViewController.swift */; };
+		0DF83B9C247CBF2A00B2F734 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B9B247CBF2A00B2F734 /* UserListViewController.swift */; };
+		0DF83B9E247CE89600B2F734 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B9D247CE89600B2F734 /* User.swift */; };
+		0DF83BA0247D0C6600B2F734 /* UIViewController+extensitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B9F247D0C6600B2F734 /* UIViewController+extensitions.swift */; };
+		0DF83BA2247D0F2B00B2F734 /* UserCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83BA1247D0F2A00B2F734 /* UserCell.swift */; };
+		0DF83BA4247D1E1600B2F734 /* UIImageView+extensitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83BA3247D1E1600B2F734 /* UIImageView+extensitions.swift */; };
 		54296C161975FA9BC457CD26 /* Pods_BBChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 72CF7DF9EF86F211CBB40F05 /* Pods_BBChat.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0DF83B53247767A800B2F734 /* BBChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BBChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DF83B56247767A800B2F734 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0DF83B58247767A800B2F734 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		0DF83B5A247767A800B2F734 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		0DF83B5A247767A800B2F734 /* MessageListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessageListViewController.swift; sourceTree = "<group>"; };
 		0DF83B5D247767A800B2F734 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0DF83B5F247767AA00B2F734 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0DF83B62247767AA00B2F734 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -41,6 +44,11 @@
 		0DF83B7524779FC400B2F734 /* UIColor+extensitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+extensitions.swift"; sourceTree = "<group>"; };
 		0DF83B772477AC8100B2F734 /* cat.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = cat.mp4; sourceTree = "<group>"; };
 		0DF83B792477BDDD00B2F734 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		0DF83B9B247CBF2A00B2F734 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
+		0DF83B9D247CE89600B2F734 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		0DF83B9F247D0C6600B2F734 /* UIViewController+extensitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIViewController+extensitions.swift"; sourceTree = "<group>"; };
+		0DF83BA1247D0F2A00B2F734 /* UserCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCell.swift; sourceTree = "<group>"; };
+		0DF83BA3247D1E1600B2F734 /* UIImageView+extensitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImageView+extensitions.swift"; sourceTree = "<group>"; };
 		72CF7DF9EF86F211CBB40F05 /* Pods_BBChat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_BBChat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0B4DA7955D148EF1C83B8AC /* Pods-BBChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BBChat.release.xcconfig"; path = "Target Support Files/Pods-BBChat/Pods-BBChat.release.xcconfig"; sourceTree = "<group>"; };
 		B7ABE3A6414A6ED7A312386D /* Pods-BBChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-BBChat.debug.xcconfig"; path = "Target Support Files/Pods-BBChat/Pods-BBChat.debug.xcconfig"; sourceTree = "<group>"; };
@@ -82,11 +90,13 @@
 				0DF83B772477AC8100B2F734 /* cat.mp4 */,
 				0DF83B6C2477689E00B2F734 /* Extensitions */,
 				0DF83B56247767A800B2F734 /* AppDelegate.swift */,
-				0DF83B58247767A800B2F734 /* SceneDelegate.swift */,
-				0DF83B5A247767A800B2F734 /* ViewController.swift */,
+				0DF83B5A247767A800B2F734 /* MessageListViewController.swift */,
 				0DF83B6A247767DA00B2F734 /* LoginViewController.swift */,
 				0DF83B7324779F3000B2F734 /* RegisterViewController.swift */,
 				0DF83B792477BDDD00B2F734 /* HomeViewController.swift */,
+				0DF83B9B247CBF2A00B2F734 /* UserListViewController.swift */,
+				0DF83B9D247CE89600B2F734 /* User.swift */,
+				0DF83BA1247D0F2A00B2F734 /* UserCell.swift */,
 				0DF83B5C247767A800B2F734 /* Main.storyboard */,
 				0DF83B5F247767AA00B2F734 /* Assets.xcassets */,
 				0DF83B61247767AA00B2F734 /* LaunchScreen.storyboard */,
@@ -102,6 +112,8 @@
 				0DF83B6D2477689E00B2F734 /* UIView+Layout.swift */,
 				0DF83B6E2477689E00B2F734 /* UIView+Stack.swift */,
 				0DF83B7524779FC400B2F734 /* UIColor+extensitions.swift */,
+				0DF83B9F247D0C6600B2F734 /* UIViewController+extensitions.swift */,
+				0DF83BA3247D1E1600B2F734 /* UIImageView+extensitions.swift */,
 			);
 			path = Extensitions;
 			sourceTree = "<group>";
@@ -242,12 +254,16 @@
 			files = (
 				0DF83B6B247767DA00B2F734 /* LoginViewController.swift in Sources */,
 				0DF83B702477689E00B2F734 /* UIView+Stack.swift in Sources */,
+				0DF83BA0247D0C6600B2F734 /* UIViewController+extensitions.swift in Sources */,
 				0DF83B7624779FC400B2F734 /* UIColor+extensitions.swift in Sources */,
 				0DF83B7424779F3000B2F734 /* RegisterViewController.swift in Sources */,
-				0DF83B5B247767A800B2F734 /* ViewController.swift in Sources */,
+				0DF83BA4247D1E1600B2F734 /* UIImageView+extensitions.swift in Sources */,
+				0DF83B5B247767A800B2F734 /* MessageListViewController.swift in Sources */,
+				0DF83B9C247CBF2A00B2F734 /* UserListViewController.swift in Sources */,
 				0DF83B7A2477BDDD00B2F734 /* HomeViewController.swift in Sources */,
+				0DF83BA2247D0F2B00B2F734 /* UserCell.swift in Sources */,
 				0DF83B57247767A800B2F734 /* AppDelegate.swift in Sources */,
-				0DF83B59247767A800B2F734 /* SceneDelegate.swift in Sources */,
+				0DF83B9E247CE89600B2F734 /* User.swift in Sources */,
 				0DF83B6F2477689E00B2F734 /* UIView+Layout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

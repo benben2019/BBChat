@@ -87,6 +87,7 @@ class RegisterViewController: UIViewController {
             email.count > 0,
             password.count > 0 else {
                 print("信息未完善！")
+                alert("信息未完善！")
                 return
         }
         Auth.auth().createUser(withEmail: email, password: password) {[weak self] (result, error) in
@@ -96,7 +97,8 @@ class RegisterViewController: UIViewController {
                 return
             }
             self.uid = result!.user.uid
-            self.navigationController?.popViewController(animated: true)
+            self.dismiss(animated: true, completion: nil)
+            
             let db = Firestore.firestore()
             let data: [String : Any] = ["username" : username,"uid" : result!.user.uid,"iconUrl" : self.iconUrl ?? ""]
             db.collection("users").addDocument(data: data) { (err) in
@@ -118,7 +120,15 @@ class RegisterViewController: UIViewController {
     }
     
     fileprivate func updateUserinfo(_ uid: String,values: [String: Any]) {
-        
+        Firestore.firestore().collection("users").document(uid).updateData(values) { (error) in
+            if let error = error {
+                print("更新头像失败！ :",error.localizedDescription)
+                self.alert("更新头像失败！ :,\(error.localizedDescription)")
+            } else {
+                print("头像更新成功！")
+                self.alert("头像更新成功！")
+            }
+        }
     }
     
     fileprivate func uploadImage(_ image: UIImage) {
@@ -127,12 +137,14 @@ class RegisterViewController: UIViewController {
         let metadata = StorageMetadata()
         metadata.contentType = "image/jpeg"
         
-        guard let imageData = image.jpegData(compressionQuality: 1.0) else { return }
+        guard let imageData = image.jpegData(compressionQuality: 0.1) else { return }
         let uploadTask = storageRef.putData(imageData, metadata: metadata) {[weak self] (metadata, error) in
             
             guard let self = self else { return }
             if let error = error {
                 print(error.localizedDescription)
+                self.dismiss(animated: true, completion: nil)
+                return
             } else {
                 print("图片上传成功！")
                 print(metadata!.path as Any)

@@ -7,34 +7,82 @@
 //
 
 import UIKit
+import Firebase
 
 class HomeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "more", style: .plain, target: self, action: #selector(moreClick))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "logout", style: .plain, target: self, action: #selector(logoutClick))
         
         view.backgroundColor = .white
         
-        let label = UILabel()
-        label.text = "欢迎！"
-        label.font = UIFont.systemFont(ofSize: 36)
-        label.textColor = .red
-        label.textAlignment = .center
-        
-        view.stack(label)
+        observeLoginStatus()
+        checkLoginStatus()
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func observeLoginStatus() {
+        Auth.auth().addStateDidChangeListener { (auth, user) in
+            if let user = user {
+                Firestore.firestore().collection("users").whereField("uid", isEqualTo: user.uid).getDocuments { (documents, error) in
+                    if let documents = documents?.documents,let curUser = documents.first?.data() {
+                        let iconUrl = curUser["iconUrl"] as! String
+                        let username = curUser["username"] as! String
+                        self.setTitleView(iconUrl, username: username)
+                    } else {
+                        print("nothing queryed")
+                        self.navigationItem.titleView = nil
+                    }
+                }
+            } else {
+                self.navigationItem.titleView = nil
+            }
+        }
     }
-    */
-
+    
+    func setTitleView(_ iconUrl: String,username: String) {
+        let container = UIView()
+        let iconImageView = UIImageView()
+        iconImageView.layer.cornerRadius = 15
+        iconImageView.clipsToBounds = true
+        iconImageView.loadCacheImage(iconUrl)
+        
+        
+        let nameLab = UILabel()
+        nameLab.textColor = .black
+        nameLab.font = UIFont.boldSystemFont(ofSize: 16)
+        nameLab.text = username
+        
+        container.hstack(iconImageView.withSize(.init(width: 30, height: 30)),nameLab,spacing: 5,alignment: .center)
+        
+        self.navigationItem.titleView = container
+    }
+    
+    func checkLoginStatus() {
+        if let currentUid = Auth.auth().currentUser?.uid { // 已登录
+            print(currentUid)
+        } else {
+            present(UINavigationController(rootViewController: MessageListViewController()), animated: true, completion: nil)
+        }
+    }
+    
+    
+    @objc func moreClick() {
+        if Auth.auth().currentUser == nil {
+            print("need login first!")
+            return
+        }
+        navigationController?.pushViewController(UserListViewController(), animated: true)
+    }
+    
+    @objc func logoutClick() {
+        do {
+            try Auth.auth().signOut()
+            present(UINavigationController(rootViewController: MessageListViewController()), animated: true, completion: nil)
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
 }

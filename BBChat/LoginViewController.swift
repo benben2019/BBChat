@@ -68,7 +68,7 @@ class LoginViewController: UIViewController {
                 print("信息未完善！")
                 return
         }
-        Auth.auth().signIn(withEmail: email, password: password) { (result, error) in
+        Auth.auth().signIn(withEmail: email, password: password) {[weak self] (result, error) in
             if let error = error {
                 print(error.localizedDescription)
                 return
@@ -76,10 +76,7 @@ class LoginViewController: UIViewController {
             
             print("登录成功！")
             
-            if let window = UIApplication.shared.keyWindow {
-                window.rootViewController = HomeViewController()
-                window.makeKeyAndVisible()
-            }
+            self?.dismiss(animated: true, completion: nil)
             
         }
     }
