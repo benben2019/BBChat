@@ -64,7 +64,9 @@ class HomeViewController: UIViewController {
         if let currentUid = Auth.auth().currentUser?.uid { // 已登录
             print(currentUid)
         } else {
-            present(UINavigationController(rootViewController: MessageListViewController()), animated: true, completion: nil)
+            let nav = UINavigationController(rootViewController: MessageListViewController())
+            nav.modalPresentationStyle = .fullScreen
+            present(nav, animated: true, completion: nil)
         }
     }
     
@@ -80,7 +82,9 @@ class HomeViewController: UIViewController {
     @objc func logoutClick() {
         do {
             try Auth.auth().signOut()
-            present(UINavigationController(rootViewController: MessageListViewController()), animated: true, completion: nil)
+            let nav = UINavigationController(rootViewController: MessageListViewController())
+            nav.modalPresentationStyle = .fullScreen
+            present(nav, animated: true, completion: nil)
         } catch {
             print(error.localizedDescription)
         }
