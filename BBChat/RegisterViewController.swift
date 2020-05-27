@@ -94,6 +94,7 @@ class RegisterViewController: UIViewController {
             guard let self = self else { return }
             if let error = error {
                 print(error.localizedDescription)
+                self.alert(error.localizedDescription)
                 return
             }
             self.uid = result!.user.uid

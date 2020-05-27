@@ -15,7 +15,7 @@ class HomeViewController: UIViewController {
         super.viewDidLoad()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "more", style: .plain, target: self, action: #selector(moreClick))
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "logout", style: .plain, target: self, action: #selector(logoutClick))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(logoutClick))
         
         view.backgroundColor = .white
         
@@ -24,9 +24,16 @@ class HomeViewController: UIViewController {
     }
     
     func observeLoginStatus() {
+        
         Auth.auth().addStateDidChangeListener { (auth, user) in
+            let activity = UIActivityIndicatorView(style: .medium)
+            activity.hidesWhenStopped = true
+            activity.startAnimating()
+            self.navigationItem.titleView = activity
+            
             if let user = user {
                 Firestore.firestore().collection("users").whereField("uid", isEqualTo: user.uid).getDocuments { (documents, error) in
+                    activity.stopAnimating()
                     if let documents = documents?.documents,let curUser = documents.first?.data() {
                         let iconUrl = curUser["iconUrl"] as! String
                         let username = curUser["username"] as! String
@@ -37,6 +44,7 @@ class HomeViewController: UIViewController {
                     }
                 }
             } else {
+                activity.stopAnimating()
                 self.navigationItem.titleView = nil
             }
         }
@@ -55,7 +63,9 @@ class HomeViewController: UIViewController {
         nameLab.font = UIFont.boldSystemFont(ofSize: 16)
         nameLab.text = username
         
-        container.hstack(iconImageView.withSize(.init(width: 30, height: 30)),nameLab,spacing: 5,alignment: .center)
+        let iconSize: CGFloat = iconUrl.count > 0 ? 30 : 0.1
+        let spacing: CGFloat = iconUrl.count > 0 ? 5 : 0
+        container.hstack(iconImageView.withSize(.init(width: iconSize, height: iconSize)),nameLab,spacing: spacing,alignment: .center)
         
         self.navigationItem.titleView = container
     }

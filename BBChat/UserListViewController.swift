@@ -16,6 +16,7 @@ class UserListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.tableFooterView = UIView()
         tableView.register(UserCell.self, forCellReuseIdentifier: "cellId")
         
         fetchUsers()
