@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import Foundation
+import Firebase
 
 class UserCell: UITableViewCell {
     
@@ -34,9 +34,22 @@ class UserCell: UITableViewCell {
         return lab
     }()
     
+    let timeLab: UILabel = {
+        let lab = UILabel()
+        lab.font = UIFont.systemFont(ofSize: 12)
+        lab.textColor = .lightGray
+        return lab
+    }()
+    
     var user: User! {
         didSet {
             updateData()
+        }
+    }
+    
+    var message: ChatMessage! {
+        didSet {
+            updateMessage()
         }
     }
 
@@ -52,6 +65,7 @@ class UserCell: UITableViewCell {
                      subLab,
                      spacing: 6),
                UIView(),
+               timeLab.withHeight(20),
                spacing: 10,
                alignment: .center)
         .withAllSide(10)
@@ -71,6 +85,32 @@ class UserCell: UITableViewCell {
         guard let url = user.iconUrl,url.count > 0 else { return }
         
         iconImageView.loadCacheImage(url)
+        
+    }
+    
+    func updateMessage() {
+        
+        subLab.text = message.content
+        
+        let date = Date(timeIntervalSince1970: message.timestamp!)
+        let formatter = DateFormatter()
+        formatter.dateFormat = "hh:mm:ss a"
+        timeLab.text = formatter.string(from: date)
+        
+        iconImageView.image = nil
+        Firestore.firestore().collection(BBUserKey).whereField("uid", isEqualTo: message.toUid!).getDocuments { (documents, error) in
+            
+            if let documents = documents?.documents,let curUser = documents.first?.data() {
+                let iconUrl = curUser["iconUrl"] as? String
+                let username = curUser["username"] as! String
+                self.nameLab.text = username
+                if let url = iconUrl {
+                    self.iconImageView.loadCacheImage(url)
+                }
+            } else {
+                print("nothing queryed")
+            }
+        }
         
     }
 }

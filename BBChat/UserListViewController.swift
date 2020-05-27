@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import Firebase
 
 class UserListViewController: UITableViewController {
 
@@ -25,25 +24,15 @@ class UserListViewController: UITableViewController {
 
     func fetchUsers() {
         
-        Firestore.firestore().collection("users").addSnapshotListener {[weak self] (snapshot, error) in
+        FirebaseManager.shared.fetchUserList {[weak self] (result) in
             guard let self = self else { return }
-            guard let documents = snapshot?.documents else {
-                print("Error fetching documents: \(error!)")
-                return
+            switch result {
+            case .success(let users):
+                self.users = users
+                self.tableView.reloadData()
+            case .failure(let error):
+                print(error.localizedDescription)
             }
-            
-            let username = documents.map { $0["username"]! }
-            print("Current users : \(username)")
-            
-            let _ = documents.map { (document) in
-                let user = User()
-                user.uid = document.data()["uid"] as? String
-                user.username = document.data()["username"] as? String
-                user.iconUrl = document.data()["iconUrl"] as? String
-                self.users.append(user)
-            }
-            
-            self.tableView.reloadData()
         }
     }
     
@@ -59,6 +48,13 @@ class UserListViewController: UITableViewController {
         let user = users[indexPath.row]
         cell.user = user
         return cell
+    }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: false)
+        let chatVc = ChatViewController(collectionViewLayout: UICollectionViewFlowLayout())
+        chatVc.user = users[indexPath.row]
+        navigationController?.pushViewController(chatVc, animated: true)
     }
 
 }

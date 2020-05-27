@@ -8,7 +8,6 @@
 
 import UIKit
 import Firebase
-import FirebaseFirestore
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -20,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.backgroundColor = .white
-        window?.rootViewController = UINavigationController(rootViewController: HomeViewController())
+        window?.rootViewController = UINavigationController(rootViewController: MessageListViewController())
         window?.makeKeyAndVisible()
         
         FirebaseApp.configure()

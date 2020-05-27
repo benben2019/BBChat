@@ -24,9 +24,9 @@ class LoginViewController: UIViewController {
           setupTextField(emailTextField).placeholder = "请输入邮箱"
           setupTextField(passwordField).placeholder = "请输入密码"
           
-          loginBtn.backgroundColor = .cyan
-          loginBtn.layer.borderColor = UIColor.black.cgColor
-          loginBtn.layer.borderWidth = 2
+          loginBtn.backgroundColor = .buttonRed
+//          loginBtn.layer.borderColor = UIColor.black.cgColor
+//          loginBtn.layer.borderWidth = 2
           loginBtn.layer.cornerRadius = 10
           loginBtn.clipsToBounds = true
           loginBtn.setTitle("登录", for: .normal)
@@ -42,19 +42,19 @@ class LoginViewController: UIViewController {
           .padTop(60)
           .padLeft(30)
           .padRight(30)
-      }
-      
-      @discardableResult
-      private func setupTextField(_ f: UITextField) -> UITextField {
-          f.layer.borderColor = UIColor(r: 100, g: 10, b: 180).cgColor
-          f.layer.borderWidth = 2
-          f.layer.cornerRadius = 10
-          f.clipsToBounds = true
-          f.leftView = UIView().withWidth(15)
-          f.leftViewMode = .always
-          f.font = UIFont.systemFont(ofSize: 14)
-          return f
-      }
+    }
+    
+    @discardableResult
+    private func setupTextField(_ f: UITextField) -> UITextField {
+        f.layer.borderColor = UIColor.buttonRed.cgColor
+        f.layer.borderWidth = 2
+        f.layer.cornerRadius = 10
+        f.clipsToBounds = true
+        f.leftView = UIView().withWidth(15)
+        f.leftViewMode = .always
+        f.font = UIFont.systemFont(ofSize: 14)
+        return f
+    }
     
       override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
           view.endEditing(true)
@@ -66,6 +66,7 @@ class LoginViewController: UIViewController {
             email.count > 0,
             password.count > 0 else {
                 print("信息未完善！")
+                alert("信息未完善！")
                 return
         }
         Auth.auth().signIn(withEmail: email, password: password) {[weak self] (result, error) in

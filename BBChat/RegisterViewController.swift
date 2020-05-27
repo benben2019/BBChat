@@ -30,9 +30,9 @@ class RegisterViewController: UIViewController {
         setupTextField(emailTextField).placeholder = "请输入邮箱"
         setupTextField(passwordField).placeholder = "请输入密码"
         
-        regisBtn.backgroundColor = .cyan
-        regisBtn.layer.borderColor = UIColor.black.cgColor
-        regisBtn.layer.borderWidth = 2
+        regisBtn.backgroundColor = .buttonRed
+//        regisBtn.layer.borderColor = UIColor.black.cgColor
+//        regisBtn.layer.borderWidth = 2
         regisBtn.layer.cornerRadius = 10
         regisBtn.clipsToBounds = true
         regisBtn.setTitle("开始注册", for: .normal)
@@ -65,7 +65,7 @@ class RegisterViewController: UIViewController {
     
     @discardableResult
     private func setupTextField(_ f: UITextField) -> UITextField {
-        f.layer.borderColor = UIColor(r: 100, g: 10, b: 180).cgColor
+        f.layer.borderColor = UIColor.buttonRed.cgColor
         f.layer.borderWidth = 2
         f.layer.cornerRadius = 10
         f.clipsToBounds = true
@@ -99,16 +99,8 @@ class RegisterViewController: UIViewController {
             }
             self.uid = result!.user.uid
             self.dismiss(animated: true, completion: nil)
-            
-            let db = Firestore.firestore()
-            let data: [String : Any] = ["username" : username,"uid" : result!.user.uid,"iconUrl" : self.iconUrl ?? ""]
-            db.collection("users").addDocument(data: data) { (err) in
-                if let err = err {
-                    print(err.localizedDescription)
-                } else {
-                    print("用户 \(username) - \(result!.user.uid) 已存入数据库！")
-                }
-            }
+
+            FirebaseManager.shared.updateUser(uid: result!.user.uid, username: username, iconUrl: self.iconUrl)
         }
     }
     
