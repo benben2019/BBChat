@@ -25,7 +25,6 @@ class MessageListViewController: UITableViewController {
         tableView.register(UserCell.self, forCellReuseIdentifier: "cellId")
         
         observeLoginStatus()
-        checkLoginStatus()
     }
     
     func observeLoginStatus() {
@@ -46,6 +45,12 @@ class MessageListViewController: UITableViewController {
             } else {
                 activity.stopAnimating()
                 self.navigationItem.titleView = nil
+                self.messages.removeAll()
+                self.tableView.reloadData()
+                
+                let nav = UINavigationController(rootViewController: MainPageViewController())
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true, completion: nil)
             }
         }
     }
@@ -73,16 +78,6 @@ class MessageListViewController: UITableViewController {
         self.navigationItem.titleView = container
     }
     
-    func checkLoginStatus() {
-        if let currentUid = FirebaseManager.shared.currentUser?.uid { // 已登录
-            print(currentUid)
-        } else {
-            let nav = UINavigationController(rootViewController: MainPageViewController())
-            nav.modalPresentationStyle = .fullScreen
-            present(nav, animated: true, completion: nil)
-        }
-    }
-    
     func fetchMessageList() {
         FirebaseManager.shared.fetchChatList {[weak self] (result) in
             guard let self = self else { return }
@@ -105,13 +100,12 @@ class MessageListViewController: UITableViewController {
     }
     
     @objc func logoutClick() {
-        do {
-            try Auth.auth().signOut()
-            let nav = UINavigationController(rootViewController: MessageListViewController())
-            nav.modalPresentationStyle = .fullScreen
-            present(nav, animated: true, completion: nil)
-        } catch {
-            print(error.localizedDescription)
+        alertLogout {
+            do {
+                try Auth.auth().signOut()
+            } catch {
+                print(error.localizedDescription)
+            }
         }
     }
 }

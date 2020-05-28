@@ -140,11 +140,11 @@
 		0DF83BB0247FB37F00B2F734 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				0DF83BB1247FB37F00B2F734 /* ChatViewController.swift */,
+				0DF83BB5247FB37F00B2F734 /* MessageListViewController.swift */,
 				0DF83BB2247FB37F00B2F734 /* MainPageViewController.swift */,
+				0DF83BB1247FB37F00B2F734 /* ChatViewController.swift */,
 				0DF83BB3247FB37F00B2F734 /* LoginViewController.swift */,
 				0DF83BB4247FB37F00B2F734 /* UserListViewController.swift */,
-				0DF83BB5247FB37F00B2F734 /* MessageListViewController.swift */,
 				0DF83BB6247FB37F00B2F734 /* RegisterViewController.swift */,
 			);
 			path = Controller;

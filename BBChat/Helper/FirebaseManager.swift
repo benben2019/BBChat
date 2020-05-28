@@ -12,10 +12,15 @@ import Firebase
 struct FirebaseManager {
     static let shared = FirebaseManager()
     
+    enum messageScene {
+        case messageList,chat
+    }
+    
     var currentUser: FirebaseAuth.User? {
         return Auth.auth().currentUser
     }
     
+    /// 查询用户信息
     func queryUser(_ uid: String, completion: @escaping ((User) -> Void)) {
         Firestore.firestore().collection(BBUserKey).whereField("uid", isEqualTo: uid).getDocuments {(documents, error) in
             if let documents = documents?.documents,let curUser = documents.first?.data() {
@@ -25,11 +30,12 @@ struct FirebaseManager {
         }
     }
     
+    /// 获取私聊消息
     func queryChatMessages(_ uid: String, completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
-        Firestore.firestore().collection(BBUserMessageKey).document(uid).addSnapshotListener { (snapshot, error) in
+        Firestore.firestore().collection(BBUserMessageKey).document(currentUser!.uid).addSnapshotListener { (snapshot, error) in
             if let sn = snapshot, let messageIds = sn.data()?.keys {
                 print(messageIds)
-                self.queryMessages(messageIds, isAll: true, completion: completion)
+                self.queryMessages(messageIds, scene: .chat, targetUid: uid,completion: completion)
             }
         }
     }
@@ -70,6 +76,7 @@ struct FirebaseManager {
         }
     }
     
+    /// 获取用户列表数据
     func fetchUserList(completion: @escaping (Result<[User],Error>) -> Void) {
         Firestore.firestore().collection("users").addSnapshotListener { (snapshot, error) in
             guard let documents = snapshot?.documents else {
@@ -86,8 +93,9 @@ struct FirebaseManager {
         }
     }
     
+    /// 获取聊天列表数据
     func fetchChatList(completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
-        let currentUid = Auth.auth().currentUser!.uid
+        let currentUid = currentUser!.uid
         Firestore.firestore().collection(BBUserMessageKey).document(currentUid).addSnapshotListener { (snapshot, error) in
             if let error = error {
                 completion(.failure(error))
@@ -99,7 +107,7 @@ struct FirebaseManager {
         }
     }
     
-    private func queryMessages(_ messageIds: Dictionary<String, Any>.Keys,isAll: Bool = false,completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
+    private func queryMessages(_ messageIds: Dictionary<String, Any>.Keys,scene: messageScene = .messageList, targetUid: String? = nil,completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
         var messages = [ChatMessage]()
         var messageDic = [String : ChatMessage]()
         let group = DispatchGroup()
@@ -113,22 +121,26 @@ struct FirebaseManager {
                 }
                 let message = ChatMessage.messageWithValues(document!.data()!)
                 
-                if !isAll {
+                if scene == .messageList { // 聊天列表场景
                     // 和同一个人的消息只保留了最新的一条
                     if let curMessage = messageDic[message.partnerUid],curMessage.timestamp < message.timestamp {
                         messageDic[message.partnerUid] = message
                     } else if messageDic[message.partnerUid] == nil {
                         messageDic[message.partnerUid] = message
                     }
-                } else {
-                    messages.append(message)
+                } else { // 私聊场景
+                    // 从中挑选出与目标用户相关的消息
+                    if message.partnerUid == targetUid! {
+                        messages.append(message)
+                    }
+                    
                 }
                 group.leave()
             }
         }
         group.notify(queue: .main) {
             // 聊天列表中：保证刚刚发的信息排在最前面（倒序排列）
-            if !isAll {
+            if scene == .messageList {
                 messages = Array(messageDic.values).sorted(by: {$0.timestamp > $1.timestamp})
             } else {
                 // 消息列表中消息是升序

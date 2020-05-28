@@ -15,4 +15,15 @@ extension UIViewController {
         alert.addAction(confirm)
         present(alert, animated: true, completion: nil)
     }
+    
+    func alertLogout(_ completion: @escaping (() -> Void)) {
+        let alert = UIAlertController(title: "退出登录？", message: "", preferredStyle: .alert)
+        let confirm = UIAlertAction(title: "确定", style: .default) { (_) in
+            completion()
+        }
+        let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
+        alert.addAction(cancel)
+        alert.addAction(confirm)
+        present(alert, animated: true, completion: nil)
+    }
 }

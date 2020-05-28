@@ -28,7 +28,7 @@ class UserListViewController: UITableViewController {
             guard let self = self else { return }
             switch result {
             case .success(let users):
-                self.users = users
+                self.users = users.filter({$0.uid != FirebaseManager.shared.currentUser!.uid})
                 self.tableView.reloadData()
             case .failure(let error):
                 print(error.localizedDescription)

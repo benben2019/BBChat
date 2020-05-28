@@ -32,7 +32,7 @@ class ChatViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        view.backgroundColor = .white
         collectionView.backgroundColor = .white
         
         self.title = user.username
@@ -45,8 +45,9 @@ class ChatViewController: UICollectionViewController {
     func setupInputView() {
         
         let inputView = UIView()
-        inputView.backgroundColor = UIColor(r: 227, g: 230, b: 225)
-        inputView.hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50))
+        let line = UIView().withHeight(1)
+        line.backgroundColor = UIColor(r: 227, g: 230, b: 225)
+        inputView.stack(line,UIView().hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50)))
         
         view.addSubview(inputView)
         inputView.translatesAutoresizingMaskIntoConstraints = false
@@ -59,18 +60,21 @@ class ChatViewController: UICollectionViewController {
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
         collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        collectionView.bottomAnchor.constraint(equalTo: inputView.topAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: inputView.topAnchor,constant: -5).isActive = true
     }
     
     func fetchMessages() {
+        print("即将要查询与\(user.uid)用户的聊天记录")
         FirebaseManager.shared.queryChatMessages(user.uid) {[weak self] (result) in
             guard let self = self else { return }
             switch result {
             case .success(let messages):
-                print(messages)
+//                print(messages)
                 self.messages = messages
                 self.collectionView.reloadData()
-                self.collectionView.scrollToItem(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: true)
+                if self.messages.count > 0 {
+                    self.collectionView.scrollToItem(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: true)
+                }
             case .failure(let error):
                 print(error.localizedDescription)
             }
