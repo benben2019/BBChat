@@ -91,14 +91,10 @@ class UserCell: UITableViewCell {
     func updateMessage() {
         
         subLab.text = message.content
-        
-        let date = Date(timeIntervalSince1970: message.timestamp!)
-        let formatter = DateFormatter()
-        formatter.dateFormat = "hh:mm:ss a"
-        timeLab.text = formatter.string(from: date)
+        timeLab.text = message.timestamp.converToDateString()
         
         iconImageView.image = nil
-        Firestore.firestore().collection(BBUserKey).whereField("uid", isEqualTo: message.toUid!).getDocuments { (documents, error) in
+        Firestore.firestore().collection(BBUserKey).whereField("uid", isEqualTo: message.partnerUid).getDocuments { (documents, error) in
             
             if let documents = documents?.documents,let curUser = documents.first?.data() {
                 let iconUrl = curUser["iconUrl"] as? String

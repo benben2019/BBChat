@@ -44,6 +44,11 @@ class LoginViewController: UIViewController {
           .padRight(30)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        emailTextField.becomeFirstResponder()
+    }
+    
     @discardableResult
     private func setupTextField(_ f: UITextField) -> UITextField {
         f.layer.borderColor = UIColor.buttonRed.cgColor
