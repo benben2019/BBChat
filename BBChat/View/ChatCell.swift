@@ -56,7 +56,7 @@ class ChatCell: UICollectionViewCell {
         }
     }
     
-    var textWithConstraint: NSLayoutConstraint?
+    var bubbuleWidthConstraint: NSLayoutConstraint?
     var bubbuleLeftConstraint: NSLayoutConstraint?
     var bubbuleRightConstraint: NSLayoutConstraint?
     
@@ -78,16 +78,17 @@ class ChatCell: UICollectionViewCell {
         bubbleView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
         bubbuleRightConstraint = bubbleView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8)
         bubbuleLeftConstraint = bubbleView.leadingAnchor.constraint(equalTo: iconView.trailingAnchor,constant: 5)
+        bubbuleWidthConstraint = bubbleView.widthAnchor.constraint(lessThanOrEqualToConstant: CGFloat.maxBubbleWidth)
         bubbuleLeftConstraint?.isActive = false
         bubbuleRightConstraint?.isActive = true
+        bubbuleWidthConstraint?.isActive = true
         
         textLab.translatesAutoresizingMaskIntoConstraints = false
         textLab.topAnchor.constraint(equalTo: bubbleView.topAnchor,constant: UIEdgeInsets.chatBubbleInsets.top).isActive = true
         textLab.bottomAnchor.constraint(equalTo: bubbleView.bottomAnchor,constant: -UIEdgeInsets.chatBubbleInsets.bottom).isActive = true
-        textLab.trailingAnchor.constraint(equalTo: bubbleView.trailingAnchor, constant: -UIEdgeInsets.chatBubbleInsets.right).isActive = true
-        textLab.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor, constant: UIEdgeInsets.chatBubbleInsets.left).isActive = true
-        textWithConstraint = textLab.widthAnchor.constraint(equalToConstant: .maxBubbleWidth)
-        textWithConstraint?.isActive = true
+        textLab.trailingAnchor.constraint(lessThanOrEqualTo: bubbleView.trailingAnchor, constant: -UIEdgeInsets.chatBubbleInsets.right).isActive = true
+        textLab.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: UIEdgeInsets.chatBubbleInsets.left).isActive = true
+        textLab.centerXAnchor.constraint(equalTo: bubbleView.centerXAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -101,9 +102,13 @@ class ChatCell: UICollectionViewCell {
         bubbleView.backgroundColor = message.isFromSelf ? .bubbleBlue : .bubbleGray
         
         let width = ceil(message.content!.textSize(.maxChatTextWidth, attributes: chatTextAttibutes).width) // 注意这里一定要向上取整，否则两个汉字的时候会显示不全
-        textWithConstraint?.constant = width < CGFloat.minBubbleWidth ? CGFloat.minBubbleWidth : width
-        bubbuleLeftConstraint?.isActive = !message.isFromSelf
+        if width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right < CGFloat.minBubbleWidth {
+            bubbuleWidthConstraint?.constant = CGFloat.minBubbleWidth
+        } else {
+            bubbuleWidthConstraint?.constant = width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right
+        }
         bubbuleRightConstraint?.isActive = message.isFromSelf
+        bubbuleLeftConstraint?.isActive = !message.isFromSelf
         textLab.textColor = message.isFromSelf ? .white : .black
         iconView.isHidden = message.isFromSelf
         

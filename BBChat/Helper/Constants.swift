@@ -30,7 +30,6 @@ extension CGFloat {
     static let minBubbleWidth: CGFloat = 40
     static let minBubbleHeight: CGFloat = 38
     static let maxChatTextWidth: CGFloat = maxBubbleWidth - UIEdgeInsets.chatBubbleInsets.left - UIEdgeInsets.chatBubbleInsets.right
-    static let minChatTextWidth: CGFloat = minBubbleWidth - UIEdgeInsets.chatBubbleInsets.left - UIEdgeInsets.chatBubbleInsets.right
 }
 
 extension UIFont {
@@ -48,6 +47,6 @@ extension String {
 
 extension UIColor {
     static let buttonRed = UIColor(r: 158, g: 88, b: 92)
-    static let bubbleBlue = UIColor(r: 71, g: 60, b: 139)
+    static let bubbleBlue = UIColor(r: 0, g: 137, b: 249)
     static let bubbleGray = UIColor(r: 220, g: 220, b: 220)
 }

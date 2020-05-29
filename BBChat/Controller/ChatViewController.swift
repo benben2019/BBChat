@@ -30,6 +30,9 @@ class ChatViewController: UICollectionViewController {
         return btn
     }()
     
+    var inputTextView = UIView()
+    var inputTextViewBottomConstraint: NSLayoutConstraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -39,27 +42,65 @@ class ChatViewController: UICollectionViewController {
         collectionView.register(ChatCell.self, forCellWithReuseIdentifier: "cellId")
         
         setupInputView()
+        addKeyboardObservers()
         fetchMessages()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        collectionView.collectionViewLayout.invalidateLayout()
+    }
+    
+    func addKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    @objc private func keyboardWillShow(_ noti: Notification) {
+        if let userInfo = noti.userInfo {
+            let height = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue.height
+            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
+            inputTextViewBottomConstraint?.constant = -height
+            UIView.animate(withDuration: duration, animations: {
+                self.view.layoutIfNeeded()
+            }) { (_) in
+                self.scrollToBottom(true)
+            }
+        }
+    }
+    
+    @objc private func keyboardWillHide(_ noti: Notification) {
+        if let userInfo = noti.userInfo {
+            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
+            inputTextViewBottomConstraint?.constant = 0
+            UIView.animate(withDuration: duration) {
+                self.view.layoutIfNeeded()
+            }
+        }
     }
     
     func setupInputView() {
         
-        let inputView = UIView()
-        inputView.backgroundColor = .white
+        inputTextView.backgroundColor = .white
         let line = UIView().withHeight(1)
         line.backgroundColor = UIColor(r: 227, g: 230, b: 225)
-        inputView.stack(line,UIView().hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50)),UIView().withHeight(kBottomSafeHeight))
+        inputTextView.stack(line,UIView().hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50)),UIView().withHeight(kBottomSafeHeight))
         
-        view.addSubview(inputView)
-        inputView.translatesAutoresizingMaskIntoConstraints = false
-        inputView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        inputView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        inputView.heightAnchor.constraint(equalToConstant: 50 + kBottomSafeHeight).isActive = true
-        inputView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        view.addSubview(inputTextView)
+        inputTextView.translatesAutoresizingMaskIntoConstraints = false
+        inputTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        inputTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        inputTextView.heightAnchor.constraint(equalToConstant: 50 + kBottomSafeHeight).isActive = true
+        inputTextViewBottomConstraint = inputTextView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        inputTextViewBottomConstraint?.isActive = true
         
         // iphoneX机型上，collectionView默认已经拥有top：88 和 bottom：34 的inset，所以自己设置的inset都是基于这个原有的inset基础上
         collectionView.contentInset = .init(top: 8, left: 0, bottom: 50 + 8, right: 0)
         collectionView.scrollIndicatorInsets = .init(top: 8, left: 0, bottom: 50 + 8, right: 0)
+        collectionView.alwaysBounceVertical = true
     }
     
     func fetchMessages() {
@@ -71,12 +112,16 @@ class ChatViewController: UICollectionViewController {
 //                print(messages)
                 self.messages = messages
                 self.collectionView.reloadData()
-                if self.messages.count > 0 {
-                    self.collectionView.scrollToItem(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: true)
-                }
+                self.scrollToBottom()
             case .failure(let error):
                 print(error.localizedDescription)
             }
+        }
+    }
+    
+    func scrollToBottom(_ animated: Bool = false) {
+        if self.messages.count > 0 {
+            self.collectionView.scrollToItem(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: animated)
         }
     }
     
