@@ -45,22 +45,21 @@ class ChatViewController: UICollectionViewController {
     func setupInputView() {
         
         let inputView = UIView()
+        inputView.backgroundColor = .white
         let line = UIView().withHeight(1)
         line.backgroundColor = UIColor(r: 227, g: 230, b: 225)
-        inputView.stack(line,UIView().hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50)))
+        inputView.stack(line,UIView().hstack(UIView().withWidth(10),inputTextfield,sendButton.withWidth(50)),UIView().withHeight(kBottomSafeHeight))
         
         view.addSubview(inputView)
         inputView.translatesAutoresizingMaskIntoConstraints = false
         inputView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         inputView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        inputView.heightAnchor.constraint(equalToConstant: 50).isActive = true
-        inputView.bottomAnchor.constraint(equalTo: view.bottomAnchor,constant: -kBottomSafeHeight).isActive = true
+        inputView.heightAnchor.constraint(equalToConstant: 50 + kBottomSafeHeight).isActive = true
+        inputView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
         
-        collectionView.translatesAutoresizingMaskIntoConstraints = false
-        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        collectionView.bottomAnchor.constraint(equalTo: inputView.topAnchor,constant: -5).isActive = true
+        // iphoneX机型上，collectionView默认已经拥有top：88 和 bottom：34 的inset，所以自己设置的inset都是基于这个原有的inset基础上
+        collectionView.contentInset = .init(top: 8, left: 0, bottom: 50 + 8, right: 0)
+        collectionView.scrollIndicatorInsets = .init(top: 8, left: 0, bottom: 50 + 8, right: 0)
     }
     
     func fetchMessages() {
@@ -115,14 +114,22 @@ extension ChatViewController {
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cellId", for: indexPath) as! ChatCell
         let message = messages[indexPath.item]
-        cell.textLab.text = message.content
-        cell.timeLab.text = message.timestamp.converToDateString(.longDate)
+        cell.message = message
+        cell.iconUrl = user.iconUrl
         return cell
     }
 }
 
 extension ChatViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return .init(width: view.bounds.size.width, height: 50)
+        let content = messages[indexPath.item].content!
+        var height = ceil(content.textSize(.maxChatTextWidth, attributes: chatTextAttibutes).height) + UIEdgeInsets.chatBubbleInsets.top + UIEdgeInsets.chatBubbleInsets.bottom
+        height = height < CGFloat.minBubbleHeight ? CGFloat.minBubbleHeight : height
+        return .init(width: view.bounds.size.width, height: height)
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
     }
 }

@@ -9,10 +9,7 @@
 import UIKit
 
 extension UIColor {
-    
-    static let buttonRed = UIColor(r: 158, g: 88, b: 92)
-
     convenience init(r: CGFloat, g: CGFloat, b: CGFloat, a: CGFloat = 1) {
-        self.init(red: r / 255, green: b / 255, blue: b / 255, alpha: a)
+        self.init(red: r / 255.0, green: b / 255.0, blue: b / 255.0, alpha: a)
     }
 }

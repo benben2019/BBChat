@@ -18,6 +18,10 @@ class ChatMessage: NSObject {
         return FirebaseManager.shared.currentUser!.uid == fromUid ? toUid : fromUid
     }
     
+    var isFromSelf: Bool {
+        return fromUid == FirebaseManager.shared.currentUser!.uid
+    }
+    
     static func messageWithValues(_ values: [String : Any]) -> ChatMessage{
         let message = ChatMessage()
         message.fromUid = values["fromUid"] as! String

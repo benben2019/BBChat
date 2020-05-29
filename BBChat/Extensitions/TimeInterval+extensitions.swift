@@ -8,11 +8,6 @@
 
 import Foundation
 
-extension String {
-    static let shortDate = "hh:mm:ss a"
-    static let longDate = "MM-dd hh:mm a"
-}
-
 extension TimeInterval {
     func converToDateString(_ dateFormat: String = .shortDate) -> String {
         let date = Date(timeIntervalSince1970: self)

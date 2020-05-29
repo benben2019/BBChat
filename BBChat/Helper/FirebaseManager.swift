@@ -34,7 +34,6 @@ struct FirebaseManager {
     func queryChatMessages(_ uid: String, completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
         Firestore.firestore().collection(BBUserMessageKey).document(currentUser!.uid).addSnapshotListener { (snapshot, error) in
             if let sn = snapshot, let messageIds = sn.data()?.keys {
-                print(messageIds)
                 self.queryMessages(messageIds, scene: .chat, targetUid: uid,completion: completion)
             }
         }

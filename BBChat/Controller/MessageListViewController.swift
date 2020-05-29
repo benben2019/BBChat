@@ -29,13 +29,13 @@ class MessageListViewController: UITableViewController {
     
     func observeLoginStatus() {
         
-        Auth.auth().addStateDidChangeListener { (auth, user) in
+        Auth.auth().addStateDidChangeListener { (auth, _) in
             let activity = UIActivityIndicatorView(style: .medium)
             activity.hidesWhenStopped = true
             activity.startAnimating()
             self.navigationItem.titleView = activity
             
-            if let user = user {
+            if let user = auth.currentUser {
                 FirebaseManager.shared.queryUser(user.uid) { (user) in
                     self.setTitleView(user)
                 }
