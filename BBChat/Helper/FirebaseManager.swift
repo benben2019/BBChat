@@ -32,9 +32,9 @@ struct FirebaseManager {
     
     /// 获取私聊消息
     func queryChatMessages(_ uid: String, completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
-        Firestore.firestore().collection(BBUserMessageKey).document(currentUser!.uid).addSnapshotListener { (snapshot, error) in
+        Firestore.firestore().collection(BBUserMessageKey).document(currentUser!.uid).collection("partners").document(uid).addSnapshotListener { (snapshot, error) in
             if let sn = snapshot, let messageIds = sn.data()?.keys {
-                self.queryMessages(messageIds, scene: .chat, targetUid: uid,completion: completion)
+                self.queryChatMessages(messageIds, completion: completion)
             }
         }
     }
@@ -64,9 +64,9 @@ struct FirebaseManager {
         
     }
     
-    func updateUserMessages(_ values: [String : Any],documentId: String) {
+    func updateUserMessages(_ values: [String : Any],documentId: String,subDocumentId: String) {
         // 在user_messages 目录下创建 documentId 目录，如果还没有documentId的目录则创建新的，如果有了则将新的values写进documentId目录下（合并模式，documentId目录下旧的东西保留）
-        Firestore.firestore().collection("user_messages").document(documentId).setData(values, merge: true) { (err) in
+        Firestore.firestore().collection("user_messages").document(documentId).collection("partners").document(subDocumentId).setData(values, merge: true) { (err) in
             if let err = err {
                 print(err.localizedDescription)
             } else {
@@ -95,20 +95,60 @@ struct FirebaseManager {
     /// 获取聊天列表数据
     func fetchChatList(completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
         let currentUid = currentUser!.uid
-        Firestore.firestore().collection(BBUserMessageKey).document(currentUid).addSnapshotListener { (snapshot, error) in
+        Firestore.firestore().collection(BBUserMessageKey).document(currentUid).collection("partners").addSnapshotListener { (snapshot, error) in
             if let error = error {
                 completion(.failure(error))
             }
-            if let messageIds = snapshot?.data()?.keys {
-                self.queryMessages(messageIds, completion: completion)
+            
+            var messages = [ChatMessage]()
+            var messageDic = [String : ChatMessage]()
+            
+            if let partners = snapshot?.documents {
+                partners.forEach { (partner) in
+                    let messageIds = partner.data().keys
+                    
+                    let group = DispatchGroup()
+                    messageIds.forEach { (messageId) in
+                        group.enter()
+                        // 拿着消息id去找该条消息的具体内容
+                        Firestore.firestore().collection(BBMessageKey).document(messageId).getDocument { (document, err) in
+                            if let err = err {
+                                group.leave()
+                                completion(.failure(err))
+                            }
+                            if document?.data() == nil {
+                                group.leave()
+                                return
+                            }
+                            let message = ChatMessage.messageWithValues(document!.data()!)
+                            
+                            // 和同一个人的消息只保留了最新的一条
+                            if let curMessage = messageDic[message.partnerUid],curMessage.timestamp < message.timestamp {
+                                messageDic[message.partnerUid] = message
+                            } else if messageDic[message.partnerUid] == nil {
+                                messageDic[message.partnerUid] = message
+                            }
+                            group.leave()
+                        }
+                    }
+                    group.notify(queue: .main) {
+                        print(messageDic)
+                        if messageDic.keys.count == partners.count {
+                            // 聊天列表中：保证刚刚发的信息排在最前面（倒序排列）
+                            messages = Array(messageDic.values).sorted(by: {$0.timestamp > $1.timestamp})
+                            completion(.success(messages))
+                            print("一共和\(messages.count)个人聊过天")
+                            print(messages.map{$0.content.prefix(4)})
+                        }
+                    }
+                }
             }
             
         }
     }
     
-    private func queryMessages(_ messageIds: Dictionary<String, Any>.Keys,scene: messageScene = .messageList, targetUid: String? = nil,completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
+    private func queryChatMessages(_ messageIds: Dictionary<String, Any>.Keys, completion: @escaping (Result<[ChatMessage],Error>) -> Void) {
         var messages = [ChatMessage]()
-        var messageDic = [String : ChatMessage]()
         let group = DispatchGroup()
         //  print("一共有\(messageIds.count)条聊天记录，分别是：\(messageIds)")
         messageIds.forEach { (messageId) in
@@ -120,31 +160,15 @@ struct FirebaseManager {
                 }
                 let message = ChatMessage.messageWithValues(document!.data()!)
                 
-                if scene == .messageList { // 聊天列表场景
-                    // 和同一个人的消息只保留了最新的一条
-                    if let curMessage = messageDic[message.partnerUid],curMessage.timestamp < message.timestamp {
-                        messageDic[message.partnerUid] = message
-                    } else if messageDic[message.partnerUid] == nil {
-                        messageDic[message.partnerUid] = message
-                    }
-                } else { // 私聊场景
-                    // 从中挑选出与目标用户相关的消息
-                    if message.partnerUid == targetUid! {
-                        messages.append(message)
-                    }
-                    
-                }
+                messages.append(message)
+                
                 group.leave()
             }
         }
         group.notify(queue: .main) {
-            // 聊天列表中：保证刚刚发的信息排在最前面（倒序排列）
-            if scene == .messageList {
-                messages = Array(messageDic.values).sorted(by: {$0.timestamp > $1.timestamp})
-            } else {
-                // 消息列表中消息是升序
-                messages.sort(by: {$0.timestamp < $1.timestamp})
-            }
+            // 消息列表中消息是升序
+            messages.sort(by: {$0.timestamp < $1.timestamp})
+            
             completion(.success(messages))
         }
     }

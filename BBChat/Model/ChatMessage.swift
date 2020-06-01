@@ -7,15 +7,34 @@
 //
 
 import Foundation
+import UIKit
+
+enum MessageType {
+    case text,image,video
+}
 
 class ChatMessage: NSObject {
-    var content: String?
+    var content: String = ""
     var fromUid: String = ""
     var toUid: String = ""
     var timestamp: TimeInterval = 0
+    var imageUrl: String = ""
+    var videoUrl: String = ""
+    var imageWidth: CGFloat = 0
+    var imageHeight: CGFloat = 0
     
     var partnerUid: String {
         return FirebaseManager.shared.currentUser!.uid == fromUid ? toUid : fromUid
+    }
+    
+    var type: MessageType {
+        if videoUrl.count > 0 {
+            return .video
+        } else if imageUrl.count > 0 {
+            return .image
+        } else {
+            return .text
+        }
     }
     
     var isFromSelf: Bool {
@@ -27,7 +46,11 @@ class ChatMessage: NSObject {
         message.fromUid = values["fromUid"] as! String
         message.toUid = values["toUid"] as! String
         message.timestamp = values["timestamp"] as! TimeInterval
-        message.content = values["content"] as? String
+        message.content = values["content"] as! String
+        message.imageUrl = values["imageUrl"] as! String
+        message.videoUrl = values["videoUrl"] as! String
+        message.imageWidth = values["imageWidth"] as! CGFloat
+        message.imageHeight = values["imageHeight"] as! CGFloat
         return message
     }
 }

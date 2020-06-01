@@ -44,6 +44,19 @@ class ChatCell: UICollectionViewCell {
         return icon
     }()
     
+    lazy var imageView: UIImageView = {
+        let imageV = UIImageView()
+        imageV.contentMode = .scaleAspectFill
+        imageV.layer.cornerRadius = 5
+        imageV.clipsToBounds = true
+        imageV.backgroundColor = UIColor(r: 236, g: 236, b: 236)
+        imageV.isUserInteractionEnabled = true
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(previewImage(_:)))
+        imageV.addGestureRecognizer(tap)
+        return imageV
+    }()
+    
     var message: ChatMessage! {
         didSet {
             updateCell()
@@ -56,6 +69,8 @@ class ChatCell: UICollectionViewCell {
         }
     }
     
+    var previewImageClosoure: ((CGRect,UIImageView) -> Void)?
+    
     var bubbuleWidthConstraint: NSLayoutConstraint?
     var bubbuleLeftConstraint: NSLayoutConstraint?
     var bubbuleRightConstraint: NSLayoutConstraint?
@@ -66,6 +81,7 @@ class ChatCell: UICollectionViewCell {
         contentView.addSubview(bubbleView)
         contentView.addSubview(textLab)
         contentView.addSubview(iconView)
+        bubbleView.addSubview(imageView)
         
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8).isActive = true
@@ -89,6 +105,13 @@ class ChatCell: UICollectionViewCell {
         textLab.trailingAnchor.constraint(lessThanOrEqualTo: bubbleView.trailingAnchor, constant: -UIEdgeInsets.chatBubbleInsets.right).isActive = true
         textLab.leadingAnchor.constraint(greaterThanOrEqualTo: bubbleView.leadingAnchor, constant: UIEdgeInsets.chatBubbleInsets.left).isActive = true
         textLab.centerXAnchor.constraint(equalTo: bubbleView.centerXAnchor).isActive = true
+        
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.leadingAnchor.constraint(equalTo: bubbleView.leadingAnchor).isActive = true
+        imageView.topAnchor.constraint(equalTo: bubbleView.topAnchor).isActive = true
+        imageView.widthAnchor.constraint(equalTo: bubbleView.widthAnchor).isActive = true
+        imageView.heightAnchor.constraint(equalTo: bubbleView.heightAnchor).isActive = true
+        
     }
     
     required init?(coder: NSCoder) {
@@ -97,20 +120,38 @@ class ChatCell: UICollectionViewCell {
     
     func updateCell() {
         //        cell.textLab.text = message.content
-        textLab.attributedText = NSMutableAttributedString(string: message.content!, attributes: chatTextAttibutes)
+        textLab.attributedText = NSMutableAttributedString(string: message.content, attributes: chatTextAttibutes)
         //        cell.timeLab.text = message.timestamp.converToDateString(.longDate)
-        bubbleView.backgroundColor = message.isFromSelf ? .bubbleBlue : .bubbleGray
+        bubbleView.backgroundColor = message.type == .text ? (message.isFromSelf ? .bubbleBlue : .bubbleGray) : .clear
         
-        let width = ceil(message.content!.textSize(.maxChatTextWidth, attributes: chatTextAttibutes).width) // 注意这里一定要向上取整，否则两个汉字的时候会显示不全
-        if width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right < CGFloat.minBubbleWidth {
-            bubbuleWidthConstraint?.constant = CGFloat.minBubbleWidth
+        if message.type != .text {
+            bubbuleWidthConstraint?.constant = .maxChatTextWidth
         } else {
-            bubbuleWidthConstraint?.constant = width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right
+            let width = ceil(message.content.textSize(.maxChatTextWidth, attributes: chatTextAttibutes).width) // 注意这里一定要向上取整，否则两个汉字的时候会显示不全
+            if width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right < CGFloat.minBubbleWidth {
+                bubbuleWidthConstraint?.constant = CGFloat.minBubbleWidth
+            } else {
+                bubbuleWidthConstraint?.constant = width + UIEdgeInsets.chatBubbleInsets.left + UIEdgeInsets.chatBubbleInsets.right
+            }
         }
+        
+        
         bubbuleRightConstraint?.isActive = message.isFromSelf
         bubbuleLeftConstraint?.isActive = !message.isFromSelf
         textLab.textColor = message.isFromSelf ? .white : .black
         iconView.isHidden = message.isFromSelf
         
+        textLab.isHidden = message.type != .text
+        imageView.isHidden = message.type == .text
+        imageView.loadCacheImage(message.imageUrl)
+    }
+}
+
+extension ChatCell {
+    @objc private func previewImage(_ tap: UITapGestureRecognizer) {
+        if let imageView = tap.view, let closour = previewImageClosoure {
+            let originFrame = imageView.superview?.convert(imageView.frame, to: nil)
+            closour(originFrame!,(imageView as! UIImageView))
+        }
     }
 }
