@@ -30,7 +30,13 @@ class MessageListViewController: UITableViewController {
     func observeLoginStatus() {
         
         Auth.auth().addStateDidChangeListener { (auth, _) in
-            let activity = UIActivityIndicatorView(style: .medium)
+            var activity: UIActivityIndicatorView
+            if #available(iOS 13.0, *) {
+                activity = UIActivityIndicatorView(style: .medium)
+            } else {
+                // Fallback on earlier versions
+                activity = UIActivityIndicatorView(style: .gray)
+            }
             activity.hidesWhenStopped = true
             activity.startAnimating()
             self.navigationItem.titleView = activity

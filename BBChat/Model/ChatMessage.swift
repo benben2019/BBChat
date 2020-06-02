@@ -20,6 +20,7 @@ class ChatMessage: NSObject {
     var timestamp: TimeInterval = 0
     var imageUrl: String = ""
     var videoUrl: String = ""
+    var coverImageUrl: String = ""
     var imageWidth: CGFloat = 0
     var imageHeight: CGFloat = 0
     
@@ -41,7 +42,7 @@ class ChatMessage: NSObject {
         return fromUid == FirebaseManager.shared.currentUser!.uid
     }
     
-    static func messageWithValues(_ values: [String : Any]) -> ChatMessage{
+    static func messageWithValues(_ values: [String : Any]) -> ChatMessage {
         let message = ChatMessage()
         message.fromUid = values["fromUid"] as! String
         message.toUid = values["toUid"] as! String
@@ -49,6 +50,7 @@ class ChatMessage: NSObject {
         message.content = values["content"] as! String
         message.imageUrl = values["imageUrl"] as! String
         message.videoUrl = values["videoUrl"] as! String
+        message.coverImageUrl = values["coverImageUrl"] as! String
         message.imageWidth = values["imageWidth"] as! CGFloat
         message.imageHeight = values["imageHeight"] as! CGFloat
         return message

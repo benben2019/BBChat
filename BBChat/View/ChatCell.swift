@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class ChatCell: UICollectionViewCell {
     
@@ -57,6 +58,22 @@ class ChatCell: UICollectionViewCell {
         return imageV
     }()
     
+    lazy var playBtn: UIButton = {
+        let btn = UIButton(type: .system)
+        btn.setImage(UIImage(named: "player_play")?.withRenderingMode(.alwaysOriginal), for: .normal)
+        btn.addTarget(self, action: #selector(playVideo), for: .touchUpInside)
+        return btn
+    }()
+    
+    let activity: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView(style: .large)
+        activity.hidesWhenStopped = true
+        return activity
+    }()
+    
+    var player: AVPlayer?
+    var playLayer: AVPlayerLayer?
+    
     var message: ChatMessage! {
         didSet {
             updateCell()
@@ -82,7 +99,23 @@ class ChatCell: UICollectionViewCell {
         contentView.addSubview(textLab)
         contentView.addSubview(iconView)
         bubbleView.addSubview(imageView)
+        bubbleView.addSubview(playBtn)
+        bubbleView.addSubview(activity)
         
+        layout()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(didEndPlayVideo), name: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: nil)
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        // cell复用的时候将layer移除，同时停止播放
+        player?.pause()
+        playLayer?.removeFromSuperlayer()
+        activity.stopAnimating()
+    }
+    
+    private func layout() {
         iconView.translatesAutoresizingMaskIntoConstraints = false
         iconView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8).isActive = true
         iconView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
@@ -112,6 +145,15 @@ class ChatCell: UICollectionViewCell {
         imageView.widthAnchor.constraint(equalTo: bubbleView.widthAnchor).isActive = true
         imageView.heightAnchor.constraint(equalTo: bubbleView.heightAnchor).isActive = true
         
+        playBtn.translatesAutoresizingMaskIntoConstraints = false
+        playBtn.widthAnchor.constraint(equalToConstant: 50).isActive = true
+        playBtn.heightAnchor.constraint(equalToConstant: 50).isActive = true
+        playBtn.centerXAnchor.constraint(equalTo: bubbleView.centerXAnchor).isActive = true
+        playBtn.centerYAnchor.constraint(equalTo: bubbleView.centerYAnchor).isActive = true
+        
+        activity.translatesAutoresizingMaskIntoConstraints = false
+        activity.centerXAnchor.constraint(equalTo: bubbleView.centerXAnchor).isActive = true
+        activity.centerYAnchor.constraint(equalTo: bubbleView.centerYAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -143,15 +185,41 @@ class ChatCell: UICollectionViewCell {
         
         textLab.isHidden = message.type != .text
         imageView.isHidden = message.type == .text
-        imageView.loadCacheImage(message.imageUrl)
+        imageView.loadCacheImage(message.type == .image ? message.imageUrl : message.coverImageUrl)
+        playBtn.isHidden = message.type != .video
     }
 }
 
 extension ChatCell {
     @objc private func previewImage(_ tap: UITapGestureRecognizer) {
+        if message.type == .video { return }
         if let imageView = tap.view, let closour = previewImageClosoure {
             let originFrame = imageView.superview?.convert(imageView.frame, to: nil)
             closour(originFrame!,(imageView as! UIImageView))
         }
+    }
+    
+    @objc private func playVideo() {
+        
+//        playBtn.isHidden = true
+        activity.startAnimating()
+        
+        let asset = AVAsset(url: URL(string: message.videoUrl)!)
+        print("该视频时长：\(asset.duration.value / Int64(asset.duration.timescale))s")
+        let playItem = AVPlayerItem(asset: asset)
+        player = AVPlayer(playerItem: playItem)
+        playLayer = AVPlayerLayer(player: player)
+        playLayer!.frame = imageView.bounds
+        bubbleView.layer.addSublayer(playLayer!)
+        
+        player?.play()
+    }
+    
+    @objc private func didEndPlayVideo() {
+        if player == nil { return }
+//        playBtn.isHidden = false
+        player?.seek(to: .zero)
+        activity.stopAnimating()
+        playLayer?.removeFromSuperlayer()
     }
 }

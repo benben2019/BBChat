@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import MobileCoreServices
+import AVFoundation
 
 class ChatViewController: UICollectionViewController {
 
@@ -72,10 +73,13 @@ class ChatViewController: UICollectionViewController {
     
     var imageUrl: String?
     var videoUrl: String?
+    var coverImageUrl: String?
     var imageSize: CGSize?
     var originFrame: CGRect?
     var previewBgView: UIView?
     var originImageView: UIImageView?
+    
+    var scrollToBottomAnimated: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -152,7 +156,8 @@ class ChatViewController: UICollectionViewController {
 //                print(messages)
                 self.messages = messages
                 self.collectionView.reloadData()
-                self.scrollToBottom(true)
+                self.scrollToBottom(self.scrollToBottomAnimated)
+                self.scrollToBottomAnimated = true
             case .failure(let error):
                 print(error.localizedDescription)
             }
@@ -169,6 +174,7 @@ class ChatViewController: UICollectionViewController {
         let inputText = imageUrl != nil ? "[图片]" : (videoUrl != nil ? "[视频]" : inputTextfield.text!)
         let imageUrl = self.imageUrl ?? ""
         let videoUrl = self.videoUrl ?? ""
+        let coverImageUrl = self.coverImageUrl ?? ""
         let timestamp = Date().timeIntervalSince1970
         let fromUid = FirebaseManager.shared.currentUser!.uid
         let toUid = user.uid
@@ -176,7 +182,7 @@ class ChatViewController: UICollectionViewController {
         
         if inputText.count == 0 && imageUrl.count == 0 && videoUrl.count == 0 { return }
         
-        let data: [String : Any] = ["content": inputText, "imageUrl": imageUrl,"videoUrl": videoUrl,"imageWidth": imageSize?.width ?? 0,"imageHeight": imageSize?.height ?? 0,"timestamp": timestamp, "fromUid": fromUid, "toUid": toUid]
+        let data: [String : Any] = ["content": inputText, "imageUrl": imageUrl,"videoUrl": videoUrl,"coverImageUrl": coverImageUrl,"imageWidth": imageSize?.width ?? 0,"imageHeight": imageSize?.height ?? 0,"timestamp": timestamp, "fromUid": fromUid, "toUid": toUid]
         let ref = FirebaseManager.shared.updateMessages(data)  // 将本条消息存入数据库
         
         let value = [ref.documentID : 1]
@@ -185,6 +191,9 @@ class ChatViewController: UICollectionViewController {
         FirebaseManager.shared.updateUserMessages(value, documentId: toUid,subDocumentId: fromUid)  // 以接收方id为索引存入一份 本条消息的索引
         
         inputTextfield.text = nil
+        self.imageUrl = nil
+        self.coverImageUrl = nil
+        self.videoUrl = nil
     }
     
     @objc func mediaPick() {
@@ -289,16 +298,102 @@ extension ChatViewController: UIImagePickerControllerDelegate,UINavigationContro
         print(info)
         if let editImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
             imageSize = editImage.size
-            uploadImage(editImage)
+            uploadImage(editImage) {[weak self] (_) in
+                self?.sendMessage()
+            }
         } else if let oriImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             imageSize = oriImage.size
-            uploadImage(oriImage)
+            uploadImage(oriImage) {[weak self] (_) in
+                self?.sendMessage()
+            }
+        } else if let videoUrl = info[UIImagePickerController.InfoKey.mediaURL] as? URL { // video
+            
+            let imageGenerator = AVAssetImageGenerator(asset: AVAsset(url: videoUrl))
+            imageGenerator.appliesPreferredTrackTransform = true // 修正图片的方向
+            var coverImage: UIImage?
+            do {
+                let cgImage = try imageGenerator.copyCGImage(at: .init(value: 1, timescale: 60), actualTime: nil)
+                coverImage = UIImage(cgImage: cgImage)
+                self.imageSize = coverImage?.size
+            } catch {
+                print(error.localizedDescription)
+            }
+            
+            guard let videoCoverImage = coverImage else { return }
+            // 先上传视频封面
+            uploadImage(videoCoverImage) {[weak self] (coverImageUrl) in
+                self?.coverImageUrl = coverImageUrl
+                // 解决iOS13下由于videoUrl路径改变引起的上传失败的问题
+                // 具体可参考:https://stackoverflow.com/questions/58104572/cant-upload-video-to-firebase-storage-on-ios-13
+                if #available(iOS 13, *) {
+                    //If on iOS13 slice the URL to get the name of the file
+                    let urlString = videoUrl.relativeString
+                    let urlSlices = urlString.split(separator: ".")
+                    //Create a temp directory using the file name
+                    let tempDirectoryURL = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+                    let targetURL = tempDirectoryURL.appendingPathComponent(String(urlSlices[1])).appendingPathExtension(String(urlSlices[2]))
+                    
+                    //Copy the video over
+                    do {
+                        try FileManager.default.copyItem(at: videoUrl, to: targetURL)
+                        self?.uploadVideo(targetURL)
+                    } catch {
+                        print(error.localizedDescription)
+                    }
+                } else {
+                    self?.uploadVideo(videoUrl)
+                }
+            }
+            
         }
     }
 }
 
 extension ChatViewController {
-    fileprivate func uploadImage(_ image: UIImage) {
+    
+    fileprivate func uploadVideo(_ videoUrl: URL) {
+        self.imageUrl = nil
+        let videoName = NSUUID().uuidString
+        let storageRef = Storage.storage().reference().child("videos/chat/" + "\(videoName).mov")
+//        let metadata = StorageMetadata()
+//        metadata.contentType = "image/jpeg"
+        
+        let uploadTask = storageRef.putFile(from: videoUrl, metadata: nil) {[weak self] (metadata, error) in
+            guard let self = self else { return }
+            if let error = error {
+                print(error.localizedDescription)
+                self.dismiss(animated: true, completion: nil)
+                return
+            } else {
+                print("视频上传成功！")
+                print(metadata!.path as Any)
+                print(metadata!.contentType as Any)
+                print(metadata!.size)
+            }
+            
+            storageRef.downloadURL { (url, error) in
+                guard let downloadURL = url else {
+                  // Uh-oh, an error occurred!
+                  return
+                }
+                
+                print(downloadURL.absoluteString)
+                self.videoUrl = downloadURL.absoluteString
+                self.sendMessage()
+            }
+            
+            self.dismiss(animated: true, completion: nil)
+        }
+        
+        // 上传进度
+        uploadTask.observe(.progress) { (snapshot) in
+            let percentComplete = 100.0 * Double(snapshot.progress!.completedUnitCount) / Double(snapshot.progress!.totalUnitCount)
+            
+            print("上传进度：\(String(format: "%.2f", percentComplete))%")
+        }
+    }
+    
+    fileprivate func uploadImage(_ image: UIImage, completion: ((String) -> Void)? = nil) {
         let imageName = NSUUID().uuidString
         let storageRef = Storage.storage().reference().child("images/chat/" + "\(imageName).jpg")
         let metadata = StorageMetadata()
@@ -329,7 +424,9 @@ extension ChatViewController {
                 print(downloadURL.absoluteString)
                 self.imageUrl = downloadURL.absoluteString
                 
-                self.sendMessage()
+                if let callback = completion {
+                    callback(downloadURL.absoluteString)
+                }
                 
             }
             
