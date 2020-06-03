@@ -27,3 +27,21 @@ extension UIViewController {
         present(alert, animated: true, completion: nil)
     }
 }
+
+extension UIViewController {
+
+    var bottomContainerController: ContainerViewController? {
+        return findSideMenuController(from: self)
+    }
+
+    fileprivate func findSideMenuController(from viewController: UIViewController) -> ContainerViewController? {
+        var sourceViewController: UIViewController? = viewController
+        repeat {
+            sourceViewController = sourceViewController?.parent
+            if let sideMenuController = sourceViewController as? ContainerViewController {
+                return sideMenuController
+            }
+        } while (sourceViewController != nil)
+        return nil
+    }
+}

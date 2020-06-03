@@ -13,6 +13,7 @@ var iPhoneX: Bool {
     return safeBottom! > 0
 }
 
+var kStatusBarHeight: CGFloat = iPhoneX ? 44 : 20
 var kBottomSafeHeight: CGFloat = iPhoneX ? 34 : 0
 
 var BBMessageKey: String = "messages"

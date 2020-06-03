@@ -17,7 +17,7 @@ class MessageListViewController: UITableViewController {
         super.viewDidLoad()
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "更多", style: .plain, target: self, action: #selector(moreClick))
-        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "登出", style: .plain, target: self, action: #selector(logoutClick))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "设置", style: .plain, target: self, action: #selector(showMenu))
         
         view.backgroundColor = .white
         
@@ -44,6 +44,7 @@ class MessageListViewController: UITableViewController {
             if let user = auth.currentUser {
                 FirebaseManager.shared.queryUser(user.uid) { (user) in
                     self.setTitleView(user)
+                    self.bottomContainerController?.menuName = user.username
                 }
                 
                 self.fetchMessageList()
@@ -105,14 +106,8 @@ class MessageListViewController: UITableViewController {
         navigationController?.pushViewController(UserListViewController(), animated: true)
     }
     
-    @objc func logoutClick() {
-        alertLogout {
-            do {
-                try Auth.auth().signOut()
-            } catch {
-                print(error.localizedDescription)
-            }
-        }
+    @objc func showMenu() {
+        bottomContainerController?.showMenu()
     }
 }
 

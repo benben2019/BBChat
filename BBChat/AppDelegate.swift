@@ -19,7 +19,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.backgroundColor = .white
-        window?.rootViewController = UINavigationController(rootViewController: MessageListViewController())
+//        window?.rootViewController = UINavigationController(rootViewController: MessageListViewController())
+        window?.rootViewController = ContainerViewController()
         window?.makeKeyAndVisible()
         
         FirebaseApp.configure()

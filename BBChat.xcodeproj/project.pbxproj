@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0D5428B02480D6DD0005C19D /* String+extensitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5428AF2480D6DD0005C19D /* String+extensitions.swift */; };
+		0D93F5CF2487716200B7A9A0 /* ContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D93F5CE2487716200B7A9A0 /* ContainerViewController.swift */; };
+		0D93F5D124877B8E00B7A9A0 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D93F5D024877B8E00B7A9A0 /* MenuViewController.swift */; };
 		0DF83B57247767A800B2F734 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF83B56247767A800B2F734 /* AppDelegate.swift */; };
 		0DF83B5E247767A800B2F734 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B5C247767A800B2F734 /* Main.storyboard */; };
 		0DF83B60247767AA00B2F734 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DF83B5F247767AA00B2F734 /* Assets.xcassets */; };
@@ -37,6 +39,8 @@
 
 /* Begin PBXFileReference section */
 		0D5428AF2480D6DD0005C19D /* String+extensitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+extensitions.swift"; sourceTree = "<group>"; };
+		0D93F5CE2487716200B7A9A0 /* ContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerViewController.swift; sourceTree = "<group>"; };
+		0D93F5D024877B8E00B7A9A0 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		0DF83B53247767A800B2F734 /* BBChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BBChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DF83B56247767A800B2F734 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0DF83B5D247767A800B2F734 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -149,6 +153,8 @@
 				0DF83BB3247FB37F00B2F734 /* LoginViewController.swift */,
 				0DF83BB4247FB37F00B2F734 /* UserListViewController.swift */,
 				0DF83BB6247FB37F00B2F734 /* RegisterViewController.swift */,
+				0D93F5CE2487716200B7A9A0 /* ContainerViewController.swift */,
+				0D93F5D024877B8E00B7A9A0 /* MenuViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -328,7 +334,9 @@
 				0DF83B57247767A800B2F734 /* AppDelegate.swift in Sources */,
 				0DF83BCB247FB3CB00B2F734 /* ChatCell.swift in Sources */,
 				0DF83BC5247FB37F00B2F734 /* RegisterViewController.swift in Sources */,
+				0D93F5D124877B8E00B7A9A0 /* MenuViewController.swift in Sources */,
 				0DF83BC0247FB37F00B2F734 /* ChatViewController.swift in Sources */,
+				0D93F5CF2487716200B7A9A0 /* ContainerViewController.swift in Sources */,
 				0DF83B6F2477689E00B2F734 /* UIView+Layout.swift in Sources */,
 				0DF83BC2247FB37F00B2F734 /* LoginViewController.swift in Sources */,
 				0DF83BC4247FB37F00B2F734 /* MessageListViewController.swift in Sources */,
