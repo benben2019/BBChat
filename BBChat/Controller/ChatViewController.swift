@@ -16,59 +16,11 @@ class ChatViewController: UICollectionViewController {
     var user: User!
     var messages = [ChatMessage]()
     
-    lazy var inputTextfield: UITextField = {
-        let textfield = UITextField()
-        textfield.textColor = .darkGray
-        textfield.placeholder = "说点什么吧..."
-        textfield.tintColor = .black
-        textfield.delegate = self
-        return textfield
+    let inputBar: InputBar = {
+        let bar = InputBar()
+        bar.placeholder = "说点好听的吧..."
+        return bar
     }()
-    
-    let sendButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.setTitle("发送", for: .normal)
-        btn.setTitleColor(.systemBlue, for: .normal)
-        btn.addTarget(self, action: #selector(sendMessage), for: .touchUpInside)
-        return btn
-    }()
-    
-    let mediaPickButton: UIButton = {
-        let btn = UIButton(type: .system)
-        btn.setTitle("+", for: .normal)
-        btn.setTitleColor(.systemBlue, for: .normal)
-        btn.addTarget(self, action: #selector(mediaPick), for: .touchUpInside)
-        btn.layer.cornerRadius = 15
-        btn.layer.borderColor = UIColor.systemBlue.cgColor
-        btn.layer.borderWidth = 1
-        btn.titleLabel?.font = .systemFont(ofSize: 20)
-        return btn
-    }()
-    
-    lazy var inputTextView: UIView = {
-        let inputTextView = UIView(frame: .init(x: 0, y: 0, width: self.view.frame.size.width, height: 50 + kBottomSafeHeight))
-        inputTextView.backgroundColor = .white
-        let line = UIView().withHeight(1)
-        line.backgroundColor = UIColor(r: 227, g: 230, b: 225)
-        inputTextView.stack(line,
-                            UIView().hstack(UIView().withWidth(5),
-                                            mediaPickButton.withSize(.init(width: 30, height: 30)),
-                                            inputTextfield,
-                                            sendButton.withWidth(50),
-                                            spacing: 5,
-                                            alignment: .center),
-                            UIView().withHeight(kBottomSafeHeight))
-        
-//        view.addSubview(inputTextView)
-//        inputTextView.translatesAutoresizingMaskIntoConstraints = false
-//        inputTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-//        inputTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-//        inputTextView.heightAnchor.constraint(equalToConstant: 50 + kBottomSafeHeight).isActive = true
-//        inputTextViewBottomConstraint = inputTextView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-//        inputTextViewBottomConstraint?.isActive = true
-        return inputTextView
-    }()
-    
     var inputTextViewBottomConstraint: NSLayoutConstraint?
     
     var imageUrl: String?
@@ -89,8 +41,9 @@ class ChatViewController: UICollectionViewController {
         self.title = user.username
         collectionView.register(ChatCell.self, forCellWithReuseIdentifier: "cellId")
         
+        setupInputView()
         setupColletcionView()
-//        addKeyboardObservers()
+        addKeyboardObservers()
         fetchMessages()
     }
     
@@ -130,21 +83,44 @@ class ChatViewController: UICollectionViewController {
         }
     }
     
+    func setupInputView() {
+        view.addSubview(inputBar)
+        inputBar.translatesAutoresizingMaskIntoConstraints = false
+        inputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        inputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        inputTextViewBottomConstraint = inputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        inputTextViewBottomConstraint?.isActive = true
+    }
+    
     func setupColletcionView() {
         
         // iphoneX机型上，collectionView默认已经拥有top：88 和 bottom：34 的inset，所以自己设置的inset都是基于这个原有的inset基础上
         collectionView.contentInset = .init(top: 8, left: 0, bottom: 8, right: 0)
         collectionView.scrollIndicatorInsets = .init(top: 8, left: 0, bottom: 8, right: 0)
         collectionView.alwaysBounceVertical = true
-        collectionView.keyboardDismissMode = .interactive
+        collectionView.keyboardDismissMode = .onDrag
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        collectionView.bottomAnchor.constraint(equalTo: inputBar.topAnchor).isActive = true
+        
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        collectionView.addGestureRecognizer(tap)
     }
     
-    override var inputAccessoryView: UIView? {
-        return inputTextView
-    }
     
-    override var canBecomeFirstResponder: Bool {
-        return true
+//    override var inputAccessoryView: UIView? {
+//        return inputTextView
+//    }
+//
+//    override var canBecomeFirstResponder: Bool {
+//        return true
+//    }
+    
+    @objc private func handleTap() {
+        inputBar.textViewResignFirstResponder()
     }
     
     func fetchMessages() {
@@ -153,7 +129,6 @@ class ChatViewController: UICollectionViewController {
             guard let self = self else { return }
             switch result {
             case .success(let messages):
-//                print(messages)
                 self.messages = messages
                 self.collectionView.reloadData()
                 self.scrollToBottom(self.scrollToBottomAnimated)
@@ -171,7 +146,7 @@ class ChatViewController: UICollectionViewController {
     }
     
     @objc func sendMessage() {
-        let inputText = imageUrl != nil ? "[图片]" : (videoUrl != nil ? "[视频]" : inputTextfield.text!)
+        let inputText = imageUrl != nil ? "[图片]" : (videoUrl != nil ? "[视频]" : inputBar.inputText ?? "")
         let imageUrl = self.imageUrl ?? ""
         let videoUrl = self.videoUrl ?? ""
         let coverImageUrl = self.coverImageUrl ?? ""
@@ -190,18 +165,10 @@ class ChatViewController: UICollectionViewController {
         
         FirebaseManager.shared.updateUserMessages(value, documentId: toUid,subDocumentId: fromUid)  // 以接收方id为索引存入一份 本条消息的索引
         
-        inputTextfield.text = nil
+        inputBar.inputText = nil
         self.imageUrl = nil
         self.coverImageUrl = nil
         self.videoUrl = nil
-    }
-    
-    @objc func mediaPick() {
-        let pickerVc = UIImagePickerController()
-        pickerVc.allowsEditing = true
-        pickerVc.mediaTypes = [kUTTypeImage as String,kUTTypeMovie as String] // 需要import MobileCoreServices
-        pickerVc.delegate = self
-        present(pickerVc, animated: true, completion: nil)
     }
     
     @objc func dismissPreviewImage(_ tap: UITapGestureRecognizer) {
@@ -209,7 +176,7 @@ class ChatViewController: UICollectionViewController {
             UIView.animate(withDuration: 0.35, delay: 0, options: .curveEaseInOut, animations: {
                 imageView.frame = self.originFrame!
                 self.previewBgView!.alpha = 0
-                self.inputTextView.alpha = 1.0
+                self.inputBar.alpha = 1.0
                 imageView.layer.cornerRadius = self.originImageView!.layer.cornerRadius
                 imageView.clipsToBounds = true
             }) { (_) in
@@ -218,13 +185,6 @@ class ChatViewController: UICollectionViewController {
             }
         }
         
-    }
-}
-
-extension ChatViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        sendMessage()
-        return true
     }
 }
 
@@ -244,7 +204,7 @@ extension ChatViewController {
             self.originImageView = oriImageView
             
             if let keywindow = UIApplication.shared.keyWindow {
-                self.inputTextfield.resignFirstResponder()
+                self.inputBar.textViewResignFirstResponder()
                 let bgView = UIView(frame: keywindow.bounds)
                 bgView.backgroundColor = .black
                 bgView.alpha = 0
@@ -261,7 +221,7 @@ extension ChatViewController {
                     imageView.frame = CGRect(x: 0, y: 0, width: keywindow.bounds.size.width, height: keywindow.bounds.size.width * originFrame.size.height / originFrame.size.width)
                     imageView.center = keywindow.center
                     bgView.alpha = 1.0
-                    self.inputTextView.alpha = 0
+                    self.inputBar.alpha = 0
                 }, completion: nil)
                 
                 let tap = UITapGestureRecognizer(target: self, action: #selector(self.dismissPreviewImage))

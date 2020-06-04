@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0D07CBEF2488F6EA005FBAEB /* InputBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D07CBEE2488F6EA005FBAEB /* InputBar.swift */; };
 		0D5428B02480D6DD0005C19D /* String+extensitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D5428AF2480D6DD0005C19D /* String+extensitions.swift */; };
 		0D93F5CF2487716200B7A9A0 /* ContainerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D93F5CE2487716200B7A9A0 /* ContainerViewController.swift */; };
 		0D93F5D124877B8E00B7A9A0 /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D93F5D024877B8E00B7A9A0 /* MenuViewController.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0D07CBEE2488F6EA005FBAEB /* InputBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputBar.swift; sourceTree = "<group>"; };
 		0D5428AF2480D6DD0005C19D /* String+extensitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+extensitions.swift"; sourceTree = "<group>"; };
 		0D93F5CE2487716200B7A9A0 /* ContainerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerViewController.swift; sourceTree = "<group>"; };
 		0D93F5D024877B8E00B7A9A0 /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
@@ -172,6 +174,7 @@
 			children = (
 				0DF83BBA247FB37F00B2F734 /* UserCell.swift */,
 				0DF83BCA247FB3CB00B2F734 /* ChatCell.swift */,
+				0D07CBEE2488F6EA005FBAEB /* InputBar.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -330,6 +333,7 @@
 				0DF83BC8247FB37F00B2F734 /* Constants.swift in Sources */,
 				0DF83BA4247D1E1600B2F734 /* UIImageView+extensitions.swift in Sources */,
 				0DF83BC7247FB37F00B2F734 /* UserCell.swift in Sources */,
+				0D07CBEF2488F6EA005FBAEB /* InputBar.swift in Sources */,
 				0D5428B02480D6DD0005C19D /* String+extensitions.swift in Sources */,
 				0DF83B57247767A800B2F734 /* AppDelegate.swift in Sources */,
 				0DF83BCB247FB3CB00B2F734 /* ChatCell.swift in Sources */,
