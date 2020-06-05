@@ -16,12 +16,38 @@ class ChatViewController: UICollectionViewController {
     var user: User!
     var messages = [ChatMessage]()
     
-    let inputBar: InputBar = {
+    lazy var inputBar: InputBar = {
         let bar = InputBar()
         bar.placeholder = "说点好听的吧..."
+        bar.imagePickerClosoure = {[weak self] in
+            self?.pickImage()
+        }
+        
+        bar.sendButtonClosoure = {[weak self] in
+            self?.sendMessage()
+        }
+        
+        bar.barWillMoveUpCallback = {[weak self] (keyboardHeight,duration) in
+            self?.inputTextViewBottomConstraint?.constant = -keyboardHeight
+            self?.collectionViewTopConstraint?.constant = -keyboardHeight
+            UIView.animate(withDuration: duration) {
+                self?.view.layoutIfNeeded()
+            }
+            self?.scrollToBottom(true)
+        }
+        
+        bar.barWillMoveDownCallback = {[weak self] (duration) in
+            self?.inputTextViewBottomConstraint?.constant = 0
+            self?.collectionViewTopConstraint?.constant = 0
+            UIView.animate(withDuration: duration) {
+                self?.view.layoutIfNeeded()
+            }
+        }
+        
         return bar
     }()
     var inputTextViewBottomConstraint: NSLayoutConstraint?
+    var collectionViewTopConstraint: NSLayoutConstraint?
     
     var imageUrl: String?
     var videoUrl: String?
@@ -43,7 +69,6 @@ class ChatViewController: UICollectionViewController {
         
         setupInputView()
         setupColletcionView()
-        addKeyboardObservers()
         fetchMessages()
     }
     
@@ -55,40 +80,12 @@ class ChatViewController: UICollectionViewController {
         collectionView.collectionViewLayout.invalidateLayout()
     }
     
-    func addKeyboardObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-    }
-    
-    @objc private func keyboardWillShow(_ noti: Notification) {
-        if let userInfo = noti.userInfo {
-            let height = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue.height
-            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
-            inputTextViewBottomConstraint?.constant = -height
-            UIView.animate(withDuration: duration, animations: {
-                self.view.layoutIfNeeded()
-            }) { (_) in
-                self.scrollToBottom(true)
-            }
-        }
-    }
-    
-    @objc private func keyboardWillHide(_ noti: Notification) {
-        if let userInfo = noti.userInfo {
-            let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as! Double
-            inputTextViewBottomConstraint?.constant = 0
-            UIView.animate(withDuration: duration) {
-                self.view.layoutIfNeeded()
-            }
-        }
-    }
-    
     func setupInputView() {
         view.addSubview(inputBar)
         inputBar.translatesAutoresizingMaskIntoConstraints = false
         inputBar.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         inputBar.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        inputTextViewBottomConstraint = inputBar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        inputTextViewBottomConstraint = inputBar.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         inputTextViewBottomConstraint?.isActive = true
     }
     
@@ -103,7 +100,8 @@ class ChatViewController: UICollectionViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        collectionView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        collectionViewTopConstraint = collectionView.topAnchor.constraint(equalTo: view.topAnchor)
+        collectionViewTopConstraint?.isActive = true
         collectionView.bottomAnchor.constraint(equalTo: inputBar.topAnchor).isActive = true
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -169,6 +167,14 @@ class ChatViewController: UICollectionViewController {
         self.imageUrl = nil
         self.coverImageUrl = nil
         self.videoUrl = nil
+    }
+    
+    @objc func pickImage() {
+        let vc = UIImagePickerController()
+        vc.allowsEditing = true
+        vc.mediaTypes = [kUTTypeImage as String,kUTTypeMPEG4 as String]
+        vc.delegate = self
+        present(vc, animated: true, completion: nil)
     }
     
     @objc func dismissPreviewImage(_ tap: UITapGestureRecognizer) {
